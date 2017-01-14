@@ -14,3 +14,5 @@ To-do
 * find out how to send myself a text message if there is a page with 'unknown' (so I need to add a filename to it)
 * make a web page where I can enter in details and submit without having to open up CPanel etc
 * have a button for users to submit bugs/errors from the program
+* make script not look for an updated file if the domains do not match
+* add individual downloads for ropbin instead of user needing to visit the page (unlikely, too complicated)
