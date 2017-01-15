@@ -11,6 +11,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -83,7 +84,7 @@ public class MainWindow extends JPanel
     	}
     }
 
-    public void initialise() throws ParserConfigurationException, SAXException, IOException
+    public void initialise() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
     	pages = Page.getPages();
     	//Page.getPages();
@@ -181,7 +182,6 @@ public class MainWindow extends JPanel
             status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
             status.setOpaque(true);
             JScrollPane scroll = new JScrollPane(status);
-            //frame.setContentPane(window);
             frame.setContentPane(scroll);
 
             frame.setLocationRelativeTo(null);
@@ -219,12 +219,12 @@ public class MainWindow extends JPanel
     {
         DefaultTableModel dtm = new DefaultTableModel(0, 0);
         //String[] header = new String[]{"Title", "URL"};
-        String[] header = new String[]{"Title"};
+        String[] header = new String[]{"Title", "Number of files"};
         dtm.setColumnIdentifiers(header);
         for(Page page : pages)
         {
             //dtm.addRow(new Object[]{page.title, page.url});
-        	dtm.addRow(new Object[]{page.title});
+        	dtm.addRow(new Object[]{page.title, Integer.toString(page.files.size())});
         }
         pageTable.setModel(dtm);
         for(int row = 0; row < pageTable.getRowCount(); row++)
@@ -236,12 +236,12 @@ public class MainWindow extends JPanel
         }
     }
 
-    public MainWindow() throws ParserConfigurationException, SAXException, IOException
+    public MainWindow() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
         initialise();
     }
 
-    private static void createWindow() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, ParserConfigurationException, SAXException, IOException
+    private static void createWindow() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, ParserConfigurationException, SAXException, IOException, ParseException
     {
     	UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     	initialiseFontSize(2.0f);
@@ -259,7 +259,7 @@ public class MainWindow extends JPanel
         frame.setVisible(true);
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, ParserConfigurationException, SAXException, IOException
+    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, ParserConfigurationException, SAXException, IOException, ParseException
     {
         createWindow();
     }
