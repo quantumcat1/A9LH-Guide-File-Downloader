@@ -191,9 +191,8 @@ public class MainWindow extends JPanel
 
     	for(FileVO f : page.getFiles())
     	{
-    		String downloadURL = f.file;
-    		if(downloadURL.equals("unknown")) continue;
-    		if(downloadURL.equals("magnet"))
+    		if(f.file.equals("unknown")) continue;
+    		if(f.link.contains("magnet"))
     		{
     			URI magnetLinkUri = new URI(f.link);
     			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
@@ -203,7 +202,7 @@ public class MainWindow extends JPanel
     		{
 	        	try
 	        	{
-	        		DownloadTask task = new DownloadTask(status, downloadURL, saveDir);
+	        		DownloadTask task = new DownloadTask(status, f.file, saveDir);
 	        		task.execute();
 	        	}
 	        	catch(Exception ex)
@@ -212,21 +211,6 @@ public class MainWindow extends JPanel
 	        	}
     		}
     	}
-    	/*String downloadURL = "http://quantumc.at/Guide.zip";
-    	String saveDir = "C:/Java Projects";
-
-    	try
-    	{
-    		progressBar.setValue(0);
-
-    		DownloadTask task = new DownloadTask(this, downloadURL, saveDir);
-    		task.addPropertyChangeListener(this);
-    		task.execute();
-    	}
-    	catch(Exception ex)
-    	{
-    		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    	}*/
     }
 
 

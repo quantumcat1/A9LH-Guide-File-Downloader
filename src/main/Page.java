@@ -80,10 +80,17 @@ public class Page
                 ArrayList<FileVO> files = new ArrayList<FileVO>();
                 for(int j = 0; j < jsonfiles.length(); j ++)
                 {
-                	files.add(new FileVO(jsonfiles.getJSONObject(j).getString("link"), jsonfiles.getJSONObject(j).getString("file")));
+                	files.add(new FileVO(jsonfiles.getJSONObject(j).getString("name"),
+                			jsonfiles.getJSONObject(j).getString("file"),
+                			jsonfiles.getJSONObject(j).getString("link"),
+                			jsonfiles.getJSONObject(j).getString("page"),
+                			jsonfiles.getJSONObject(j).getString("path"),
+                			jsonfiles.getJSONObject(j).getString("region"),
+                			jsonfiles.getJSONObject(j).getString("firmware"),
+                			jsonfiles.getJSONObject(j).getString("type"),
+                			jsonfiles.getJSONObject(j).getString("ts")));
                 }
                 list.add(new Page(obj.getString("title"), files));
-                //System.out.println(obj);
             }
 	    }
 	    return list;

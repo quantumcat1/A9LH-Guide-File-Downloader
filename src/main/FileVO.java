@@ -2,27 +2,40 @@ package main;
 
 public class FileVO
 {
-	public String name;
 	public String page;
-	public String ts;
+	public String name;
 	public String link;
 	public String file;
+	public String path;
+	public String region;
+	public String firmware;
+	public String type;
+	public String ts;
 
 	public FileVO()
 	{
-		name = "";
 		page = "";
-		ts = "";
+		name = "";
 		link = "";
 		file = "";
-	}
-	public FileVO(String link, String file)
-	{
-		name = "";
-		this.file = file;
+		path = "";
+		region = "";
+		firmware = "";
+		type = "";
 		ts = "";
+	}
+	public FileVO(String name, String file, String link, String page,
+			String path, String region, String firmware, String type, String ts)
+	{
+		this.name = name;
+		this.file = file;
+		this.ts = ts;
 		this.link = link;
-		page = "";
+		this.page = page;
+		this.path = path;
+		this.region = region;
+		this.firmware = firmware;
+		this.type = type;
 	}
 
 }
