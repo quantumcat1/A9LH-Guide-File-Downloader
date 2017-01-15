@@ -2,9 +2,9 @@
 A utility to download files associated with the A9LH guide
 
 To-do
-* ~~add path info to database~~ (done, except for going through the magnet links) ~~and make default be root when inserting new row in script~~
-* add firmware and region info to database manually (partially done)
-* add name (text in link) to database in script
+* ~~add path info to database and make default be root when inserting new row in script~~
+* ~~add firmware and region info to database manually~~ (mostly done, any others will have to be found later)
+* ~~add name (text in link) to database in script~~
 * add message section to display any warnings (e.g. file info not known, path info not known etc)
 * find out how to get the script to run anytime there is an update to the guide
 * implement search feature (low priority)
@@ -16,3 +16,4 @@ To-do
 * have a button for users to submit bugs/errors from the program
 * ~~make script not look for an updated file if the domains do not match~~
 * add individual downloads for ropbin instead of user needing to visit the page (unlikely, too complicated)
+* add region, type, and firmware selector for program
