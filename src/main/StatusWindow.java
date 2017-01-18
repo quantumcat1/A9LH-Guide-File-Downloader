@@ -12,12 +12,15 @@ public class StatusWindow extends JPanel
 {
     private static final long serialVersionUID = 3136350037469268319L;
     List<ProgressPanel> progressPanels;
+    private JPanel panelOfPanels;
     //JLabel label;
     public void initialise()
     {
         //label = new JLabel("0%");
         //add(label);
         progressPanels = new ArrayList<ProgressPanel>();
+        panelOfPanels = new JPanel();
+        add(panelOfPanels);
     }
 
     public StatusWindow()
@@ -35,7 +38,7 @@ public class StatusWindow extends JPanel
         if(name.trim().equals("")) return null;
         ProgressPanel pp = new ProgressPanel(name);
         progressPanels.add(pp);
-        add(pp.getPanel());
+        panelOfPanels.add(pp.getPanel());
         revalidate();
         repaint();
         return pp;

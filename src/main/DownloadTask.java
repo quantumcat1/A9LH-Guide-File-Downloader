@@ -24,7 +24,7 @@ public class DownloadTask extends SwingWorker<Void, Void>
     {
         this.gui = gui;
         this.downloadURL = downloadURL;
-        this.saveDirectory = saveDirectory;
+        this.saveDirectory = saveDirectory.replace("./", "/");
         fileName = "";
     }
 
@@ -46,6 +46,11 @@ public class DownloadTask extends SwingWorker<Void, Void>
             addPropertyChangeListener(pp);
 
             String saveFilePath = saveDirectory + File.separator + util.getFileName();
+            File f = new File(saveDirectory);
+            if(!f.exists())
+            {
+            	f.mkdirs();
+            }
 
             InputStream inputStream = util.getInputStream();
             // opens an output stream to save into file
@@ -91,8 +96,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
         	if(ext.equals("7z") || ext.equals("zip"))
         	{
         		try {
-        	         ZipFile zipFile = new ZipFile("C:\\Java Projects\\" + fileName);
-        	         zipFile.extractAll("C:\\Java Projects\\temp\\");
+        			ZipFile zipFile = new ZipFile(saveDirectory + File.separator + fileName);
+       	         	zipFile.extractAll(saveDirectory);
         	    } catch (ZipException e) {
         	        e.printStackTrace();
         	    }

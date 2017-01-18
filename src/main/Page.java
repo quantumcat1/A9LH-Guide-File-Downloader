@@ -94,7 +94,7 @@ public class Page {
 			// now cut out ones that are too old
 			Iterator<Page> p_iter = list.iterator();
 
-			long max_duration = MILLISECONDS.convert(10, MINUTES);
+			long max_duration = MILLISECONDS.convert(30, MINUTES);
 			// for(Page p : list)
 			while (p_iter.hasNext())
 			{

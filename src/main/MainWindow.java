@@ -169,7 +169,7 @@ public class MainWindow extends JPanel
     private void download(ActionEvent event) throws URISyntaxException, CouldNotOpenUriSchemeHandler
     {
     	if(page == null) return;
-    	String saveDir = "C:/Java Projects";
+    	//String saveDir = "C:/Java Projects";
 
     	if(status == null)
     	{
@@ -202,7 +202,7 @@ public class MainWindow extends JPanel
     		{
 	        	try
 	        	{
-	        		DownloadTask task = new DownloadTask(status, f.file, saveDir);
+	        		DownloadTask task = new DownloadTask(status, f.file, f.path);
 	        		task.execute();
 	        	}
 	        	catch(Exception ex)
@@ -219,12 +219,12 @@ public class MainWindow extends JPanel
     {
         DefaultTableModel dtm = new DefaultTableModel(0, 0);
         //String[] header = new String[]{"Title", "URL"};
-        String[] header = new String[]{"Title", "Number of files"};
+        String[] header = new String[]{"Title"/*, "Number of files"*/};
         dtm.setColumnIdentifiers(header);
         for(Page page : pages)
         {
             //dtm.addRow(new Object[]{page.title, page.url});
-        	dtm.addRow(new Object[]{page.title, Integer.toString(page.files.size())});
+        	dtm.addRow(new Object[]{page.title/*, Integer.toString(page.files.size())*/});
         }
         pageTable.setModel(dtm);
         for(int row = 0; row < pageTable.getRowCount(); row++)
