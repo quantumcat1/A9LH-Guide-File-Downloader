@@ -18,6 +18,7 @@ class F
     public $region;
     public $firmware;
     public $type;
+    public $message;
     public $ts;
 }
 
@@ -45,6 +46,7 @@ foreach($all as $row)
         $f->region = $row['region'];
         $f->firmware = $row['firmware'];
         $f->type = $row['type'];
+        $f->message = $row['message'];
         $page->files[] = $f;
     }
     else
@@ -63,6 +65,7 @@ foreach($all as $row)
         $f->region = $row['region'];
         $f->firmware = $row['firmware'];
         $f->type = $row['type'];
+        $f->message = $row['message'];
         $page->files[] = $f;
     }
 }

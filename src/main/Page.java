@@ -87,7 +87,9 @@ public class Page {
 							jsonfiles.getJSONObject(j).getString("page"), jsonfiles.getJSONObject(j).getString("path"),
 							jsonfiles.getJSONObject(j).getString("region"),
 							jsonfiles.getJSONObject(j).getString("firmware"),
-							jsonfiles.getJSONObject(j).getString("type"), jsonfiles.getJSONObject(j).getString("ts")));
+							jsonfiles.getJSONObject(j).getString("type"),
+							jsonfiles.getJSONObject(j).getString("message"),
+							jsonfiles.getJSONObject(j).getString("ts")));
 				}
 				list.add(new Page(obj.getString("title"), files));
 			}

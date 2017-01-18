@@ -10,6 +10,7 @@ public class FileVO
 	public String region;
 	public String firmware;
 	public String type;
+	public String message;
 	public String ts;
 
 	public FileVO()
@@ -22,10 +23,12 @@ public class FileVO
 		region = "";
 		firmware = "";
 		type = "";
+		message = "";
 		ts = "";
 	}
 	public FileVO(String name, String file, String link, String page,
-			String path, String region, String firmware, String type, String ts)
+			String path, String region, String firmware, String type,
+			String message, String ts)
 	{
 		this.name = name;
 		this.file = file;
@@ -36,6 +39,7 @@ public class FileVO
 		this.region = region;
 		this.firmware = firmware;
 		this.type = type;
+		this.message = message;
 	}
 
 }
