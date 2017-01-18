@@ -115,9 +115,9 @@ function findFile($url, $ext)
 function write($url, &$urlsconverted, &$Db)
 {
         $actuallink=$url;
-	if($actuallink[0] != 'h')
+	if(substr($actuallink, 0, 4) != 'http')
 	{
-		$actuallink='https://quantumcat1.github.io/'.$actuallink;
+		$actuallink = rel2abs($actuallink, 'https://quantumcat1.github.io');
 	}
         $actuallink = rtrim($actuallink,"/");
         //echo $actuallink.' '; 
@@ -134,8 +134,8 @@ function write($url, &$urlsconverted, &$Db)
 	
 	$list = $dom->getElementsByTagName("h1");
 	foreach($list as $thing) $title = trim($thing->nodeValue);
-
-        $container = $dom->getElementById("files");
+	
+	$container = $dom->getElementById("files");
         if(is_object($container))
         {
             $arr = $container->getElementsByTagName("a");
@@ -144,11 +144,10 @@ function write($url, &$urlsconverted, &$Db)
             {
                   $text = trim(preg_replace("/[\r\n]+/", " ", $item->nodeValue));
                   $href =  $item->getAttribute("href"); //to the page where files are, not necessarily the file itself
-                  $query = "SELECT * FROM 3DSLinks.File WHERE link = '$href' AND page = '$title'";
+                  $query = "SELECT * FROM 3DSLinks.File WHERE link = '$href' AND page = '$title' ORDER BY ts DESC"; //most recent one with same page and link
                   
                   $files = array();
                   $files = $Db->select($query); //find out if we have this link already
-                  //echo "<p>.query is $query";
                   if(sizeof($files) > 0) //if the link already exists in the database
                   {
                   	$filelink = trim($files[0]['file']);
@@ -165,11 +164,12 @@ function write($url, &$urlsconverted, &$Db)
                   		//get extension
                   		$sectionsByPeriod = explode(".", $filelink);
 				$last = end($sectionsByPeriod);
-				if(strpos($linklink, "http") === FALSE)
+				/*if(strpos($linklink, "http") === FALSE)
 				{
 					$linklink = ltrim($linklink, "/"); //in case it starts with a /
 					$linklink = 'https://3ds.guide/'.$linklink;
-				}
+				}*/
+				$linklink = rel2abs($linklink, 'https://3ds.guide');
 				$newfilelink = "";
 				if(trim($last) != "" && substr($linklink, 0, 10) == substr($filelink, 0, 10)) 
 				{
@@ -179,22 +179,18 @@ function write($url, &$urlsconverted, &$Db)
 				
 				if(trim($newfilelink) != '')//if we find a file with the same extension - this should always happen
 				{
-					$query = "UPDATE 3DSLinks.File SET file = '$newfilelink', name = '$text', ts = '$now' WHERE link = '$linklink' and page = '$page'";
+					$query = "UPDATE 3DSLinks.File SET file = '$newfilelink', name = '$text', ts = '$now' WHERE link = '$linklink' and page = '$title'";
 				}
 				else //assuming we always find a file with the same extension the below should not happen (except if the direct file link was entered manually and is a different domain to the link)
 				{
-					$query = "UPDATE 3DSLinks.File SET ts = '$now', name = '$text' WHERE link = '$linklink' and page = '$page'";
+					$query = "UPDATE 3DSLinks.File SET ts = '$now', name = '$text' WHERE link = '$linklink' and page = '$title'";
 				}
                   	}
                   	
                   }
                   else //new link that isn't in the database yet
                   {
-                  	if(strpos($href, "http") === FALSE)
-			{
-				$href = ltrim($href, "/"); //in case it starts with a /
-				$href = 'https://3ds.guide/'.$href;
-			}
+			$linklink = rel2abs($linklink, 'https://3ds.guide');
 			$linkisfile = isURLFile($href);
                   	//link is a direct file
                   	if($linkisfile)
@@ -214,15 +210,14 @@ function write($url, &$urlsconverted, &$Db)
                   }
 
                   $result = $Db->query($query);
-                  //echo "<p>query is $query";
-                  /*if(!$result) 
+                  if(!$result) 
                   {
                   	echo "<p>query $query failed", PHP_EOL;
                   }
                   else
                   {
-                  	echo "<p>query $query succeeded", PHP_EOL;
-                  }*/
+                  	echo "<p>query $query succeeded";
+                  }
             }
         }
         //echo "<p>pushing $url into the array";
@@ -232,9 +227,9 @@ function write($url, &$urlsconverted, &$Db)
 function findLinks($url, &$urlsconverted, &$Db)
 {
 	$actuallink=$url;
-	if($actuallink[0] != 'h')
+	if(substr($actuallink, 0, 4) != 'http')
 	{
-		$actuallink='https://quantumcat1.github.io/'.$actuallink;
+		$actuallink = rel2abs($actuallink, 'https://quantumcat1.github.io');
 	}
 	$html = file_get_contents($actuallink);
 	$dom = new DOMDocument;
@@ -248,10 +243,12 @@ function findLinks($url, &$urlsconverted, &$Db)
 	foreach ($links as $link)
 	{		
 		$linkstring = $link->getAttribute('href');
-		if($linkstring[0] != 'h')
+		if(substr($linkstring, 0, 4) != 'http')
 		{
-			$linkstring = 'https://quantumcat1.github.io/'.$actuallink;
+			//$linkstring = 'https://quantumcat1.github.io/'.$actuallink;
+			$linkstring = rel2abs($linkstring, 'https://quantumcat1.github.io');
 		}
+		
 	        $linkstring = rtrim($linkstring,"/");
 		$inguide = (strpos($linkstring, 'quantumcat1.github.io') !== FALSE);
 		$alreadyconverted = in_array($linkstring, $urlsconverted);
