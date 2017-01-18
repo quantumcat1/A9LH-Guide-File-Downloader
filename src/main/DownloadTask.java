@@ -20,13 +20,13 @@ public class DownloadTask extends SwingWorker<Void, Void>
     private StatusWindow gui;
     private String fileName;
 
-    public DownloadTask(String message, StatusWindow gui, String downloadURL, String saveDirectory)
+    public DownloadTask(StatusWindow gui, FileVO file)
     {
         this.gui = gui;
-        this.downloadURL = downloadURL;
-        this.saveDirectory = saveDirectory.replace("./", "/");
+        this.downloadURL = file.file;
+        this.saveDirectory = file.path.replace("./", "/");
         fileName = "";
-        gui.addMessage(message);
+        gui.addMessage(file.message);
     }
 
     /**

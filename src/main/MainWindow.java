@@ -202,7 +202,7 @@ public class MainWindow extends JPanel
     		{
 	        	try
 	        	{
-	        		DownloadTask task = new DownloadTask(f.message, status, f.file, f.path);
+	        		DownloadTask task = new DownloadTask(status, f);
 	        		task.execute();
 	        	}
 	        	catch(Exception ex)
