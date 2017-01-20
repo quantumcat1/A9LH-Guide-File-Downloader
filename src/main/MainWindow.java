@@ -50,14 +50,13 @@ public class MainWindow extends JPanel
 
     private JLabel title;
     private JTextArea desc;
-    private JLabel searchLabel;
-    private JTextArea search;
+    /*private JLabel searchLabel;
+    private JTextArea search;*/
     private JTable pageTable;
     private Page page;
     private ArrayList<Page> pages;
     private JButton btnGo;
     private StatusWindow status;
-    private JProgressBar progressBar; //soon to be not used
 
 
     public static void initialiseFontSize(float multiplier)
@@ -114,7 +113,7 @@ public class MainWindow extends JPanel
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
 
-        searchLabel = new JLabel("Search: ");
+        /*searchLabel = new JLabel("Search: ");
         searchLabel.setMaximumSize(new Dimension(windowWidth/3, windowHeight/10));
         searchLabel.setMinimumSize(new Dimension(windowWidth/3, windowHeight/10));
         panel.add(searchLabel);
@@ -122,7 +121,7 @@ public class MainWindow extends JPanel
         search = new JTextArea(1, 30);
         search.setMaximumSize(new Dimension(windowWidth*(2/3), windowHeight/10));
         search.setMinimumSize(new Dimension(windowWidth*(2/3), windowHeight/10));
-        panel.add(search);
+        panel.add(search);*/
 
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(panel);
@@ -161,10 +160,6 @@ public class MainWindow extends JPanel
         	}
         });
         add(btnGo);
-
-        progressBar = new JProgressBar(0, 100);
-        add(progressBar);
-
     }
     private void download(ActionEvent event) throws URISyntaxException, CouldNotOpenUriSchemeHandler
     {
