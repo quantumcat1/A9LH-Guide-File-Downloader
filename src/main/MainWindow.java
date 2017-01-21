@@ -52,11 +52,11 @@ public class MainWindow extends JPanel implements ActionListener
     public enum Region
     {
     	ALL ("All"),
-    	EUR ("Eur"),
-    	JPN ("JPN"),
-    	USA ("USA"),
-    	KOR ("Kor"),
-    	TWN ("TWN");
+    	E ("Eur"),
+    	J ("JPN"),
+    	U ("USA"),
+    	K ("Kor"),
+    	T ("TWN");
 
     	private final String desc;
     	Region(String desc)
@@ -93,8 +93,8 @@ public class MainWindow extends JPanel implements ActionListener
     public enum Type
     {
     	ALL ("All"),
-    	OLD ("Old"),
-    	NEW ("New");
+    	O ("Old"),
+    	N ("New");
 
     	private final String desc;
     	Type(String desc)
@@ -276,7 +276,46 @@ public class MainWindow extends JPanel implements ActionListener
 
     	for(FileVO f : page.getFiles())
     	{
-    		if(f.file.equals("unknown")) continue;
+    		if(f.file.equals("unknown")) continue; //need to fill in direct file link in database
+
+    		boolean foundone = false;
+
+    //..*****first check firmware of file to see if it matches the user's
+    		String fw = f.firmware;
+    		if(!fw.trim().equals("") || console.firmware == Firmware.ALL) //if blank, it's for all fws, so just keep going
+    		{
+    			String[] fws = fw.split("\\|");
+    			foundone = false; //assume we don't find any until we actually find one
+    			for(String afw : fws) //could be multiple firmwares separated by pipe character
+    			{
+    				if(afw.equals(console.firmware.desc))
+    				{
+    					foundone = true;
+    				}
+    			}
+    			if(!foundone) continue; //file is not for user's firmware so don't download this file
+    		}
+
+    //..*****now check region to see if it matches user's
+    		String reg = f.region;
+    		if(!reg.trim().equals("") || console.region == Region.ALL) //if blank, it's for all regions, so just keep going
+    		{
+    			if(!console.region.name().equals(reg))
+    			{
+    				continue; //file is not for user's region
+    			}
+    		}
+     //..*****now check type to see if it matches user's
+    		String t = f.type;
+    		if(!t.trim().equals("") || console.type == Type.ALL) //if blank, for everyone, so just continue
+    		{
+    			if(!console.type.name().equals(t))
+    			{
+    				continue; //file is not for user's console type
+    			}
+    		}
+
+
     		if(f.link.contains("magnet"))
     		{
     			URI magnetLinkUri = new URI(f.link);
