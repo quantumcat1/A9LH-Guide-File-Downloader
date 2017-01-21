@@ -18,6 +18,7 @@ import java.util.Enumeration;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -42,14 +43,75 @@ import org.xml.sax.SAXException;
 import uriSchemeHandler.CouldNotOpenUriSchemeHandler;
 import uriSchemeHandler.URISchemeHandler;
 
-public class MainWindow extends JPanel
+public class MainWindow extends JPanel implements ActionListener
 {
     private static final long serialVersionUID = -371374960795143493L;
     private static int windowWidth = 800;
     private static int windowHeight = 800;
 
-    private JLabel title;
-    private JTextArea desc;
+    public enum Region
+    {
+    	ALL ("All"),
+    	EUR ("Eur"),
+    	JPN ("JPN"),
+    	USA ("USA"),
+    	KOR ("Kor"),
+    	TWN ("TWN");
+
+    	private final String desc;
+    	Region(String desc)
+    	{
+    		this.desc = desc;
+    	}
+    	@Override
+    	public String toString()
+    	{
+    		return desc;
+    	}
+    }
+
+    public enum Firmware
+    {
+    	ALL ("All"),
+    	L_f110 ("< 11.0"),
+    	f110 ("11.0"),
+    	f111 ("11.1"),
+    	f112 ("11.2");
+
+    	private final String desc;
+    	Firmware(String desc)
+    	{
+    		this.desc = desc;
+    	}
+    	@Override
+    	public String toString()
+    	{
+    		return desc;
+    	}
+    }
+
+    public enum Type
+    {
+    	ALL ("All"),
+    	OLD ("Old"),
+    	NEW ("New");
+
+    	private final String desc;
+    	Type(String desc)
+    	{
+    		this.desc = desc;
+    	}
+    	@Override
+    	public String toString()
+    	{
+    		return desc;
+    	}
+    }
+
+
+    private JComboBox<Region> regionCombo;
+    private JComboBox<Firmware> firmwareCombo;
+    private JComboBox<Type> typeCombo;
     /*private JLabel searchLabel;
     private JTextArea search;*/
     private JTable pageTable;
@@ -57,6 +119,7 @@ public class MainWindow extends JPanel
     private ArrayList<Page> pages;
     private JButton btnGo;
     private StatusWindow status;
+    private ConsoleVO console;
 
 
     public static void initialiseFontSize(float multiplier)
@@ -85,23 +148,24 @@ public class MainWindow extends JPanel
 
     public void initialise() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
+    	console = new ConsoleVO();
     	pages = Page.getPages();
     	//Page.getPages();
 
-        title = new JLabel("A9LH Guide File Downloader");
+        JLabel title = new JLabel("A9LH Guide File Downloader");
         title.setMaximumSize(new Dimension(windowWidth, windowHeight/10));
         title.setMinimumSize(new Dimension(windowWidth, windowHeight/10));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(title);
 
-        desc = new JTextArea("This program will download "
+        JTextArea desc = new JTextArea("This program will download "
         		+ "files associated with particular pages "
         		+ "of the A9LH guide. Select a page using "
-        		+ "the table (the search box will"
-        		+ " help find them), and click Download. For"
+        		+ "the table, and click Download. For"
         		+ " quickest use, run from the root of your "
         		+ "SD card, or otherwise move the files onto "
-        		+ "your SD card afterward.");
+        		+ "your SD card afterward. Please note any messages "
+        		+ "that come up in the download status window.");
         desc.setEditable(false);
         desc.setLineWrap(true);
         desc.setWrapStyleWord(true);
@@ -113,7 +177,33 @@ public class MainWindow extends JPanel
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
 
-        /*searchLabel = new JLabel("Search: ");
+        JLabel typeLabel = new JLabel("Console type: ");
+        panel.add(typeLabel);
+
+        typeCombo = new JComboBox<Type>(Type.values());
+        typeCombo.addActionListener(this);
+        panel.add(typeCombo);
+
+        JLabel firmwareLabel = new JLabel(" Firmware: ");
+        panel.add(firmwareLabel);
+
+        firmwareCombo = new JComboBox<Firmware>(Firmware.values());
+        firmwareCombo.addActionListener(this);
+        panel.add(firmwareCombo);
+
+        JLabel regionLabel = new JLabel(" Region: ");
+        panel.add(regionLabel);
+
+        regionCombo = new JComboBox<Region>(Region.values());
+        regionCombo.addActionListener(this);
+        panel.add(regionCombo);
+
+        add(panel);
+
+        /*JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+
+        searchLabel = new JLabel("Search: ");
         searchLabel.setMaximumSize(new Dimension(windowWidth/3, windowHeight/10));
         searchLabel.setMinimumSize(new Dimension(windowWidth/3, windowHeight/10));
         panel.add(searchLabel);
@@ -121,10 +211,10 @@ public class MainWindow extends JPanel
         search = new JTextArea(1, 30);
         search.setMaximumSize(new Dimension(windowWidth*(2/3), windowHeight/10));
         search.setMinimumSize(new Dimension(windowWidth*(2/3), windowHeight/10));
-        panel.add(search);*/
+        panel.add(search);
 
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(panel);
+        add(panel);*/
 
         pageTable = new JTable();
         pageTable.setMaximumSize(new Dimension(windowWidth, windowHeight/2));
@@ -260,28 +350,23 @@ public class MainWindow extends JPanel
     }
 
 
-/*
+
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if ("go".equals(e.getActionCommand()))
-        {
-            new Thread()
-            {
-                @Override
-                public void run()
-                {
-                	//do stuff here
-                    SwingUtilities.invokeLater(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                        	//display something here
-                        }
-                    });
-                }
-            }.start();
-        }
-    }*/
+    	JComboBox cb = (JComboBox)e.getSource();
+    	if(cb == regionCombo)
+    	{
+    		console.region = (Region)cb.getSelectedItem();
+    	}
+    	else if (cb == typeCombo)
+    	{
+    		console.type = (Type)cb.getSelectedItem();
+    	}
+    	else if (cb == firmwareCombo)
+    	{
+    		console.firmware = (Firmware)cb.getSelectedItem();
+    	}
+
+    }
 }
