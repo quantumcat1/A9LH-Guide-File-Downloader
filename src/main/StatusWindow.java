@@ -3,12 +3,11 @@ package main;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class StatusWindow extends JPanel
-
 {
     private static final long serialVersionUID = 3136350037469268319L;
     List<ProgressPanel> progressPanels;
@@ -21,11 +20,12 @@ public class StatusWindow extends JPanel
         //add(label);
         progressPanels = new ArrayList<ProgressPanel>();
         panelOfPanels = new JPanel();
+        panelOfPanels.setLayout(new BoxLayout(panelOfPanels, BoxLayout.PAGE_AXIS));
         message = new JTextArea();
-        message.setLineWrap(true);
         message.setWrapStyleWord(true);
+        message.setLineWrap(true);
         add(panelOfPanels);
-        add(new JScrollPane(message));
+        add(message);
     }
 
     public StatusWindow()
@@ -43,6 +43,7 @@ public class StatusWindow extends JPanel
         if(name.trim().equals("")) return null;
         ProgressPanel pp = new ProgressPanel(name);
         progressPanels.add(pp);
+
         panelOfPanels.add(pp.getPanel());
         revalidate();
         repaint();

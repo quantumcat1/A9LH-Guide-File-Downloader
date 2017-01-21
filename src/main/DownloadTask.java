@@ -26,7 +26,7 @@ public class DownloadTask extends SwingWorker<Void, Void>
         this.downloadURL = file.file;
         this.saveDirectory = file.path.replace("./", "/");
         fileName = "";
-        gui.addMessage(file.name + ": " + file.message);
+        if(!file.message.equals("")) gui.addMessage(file.name + ": " + file.message);
     }
 
     /**

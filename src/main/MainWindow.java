@@ -266,11 +266,10 @@ public class MainWindow extends JPanel implements ActionListener
             status = new StatusWindow();
             status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
             status.setOpaque(true);
-            JScrollPane scroll = new JScrollPane(status);
-            frame.setContentPane(scroll);
+            frame.setContentPane(status);
 
-            frame.setLocationRelativeTo(null);
             frame.pack();
+            frame.setLocationRelativeTo(null);
             frame.setVisible(true);
     	}
 
@@ -314,7 +313,6 @@ public class MainWindow extends JPanel implements ActionListener
     				continue; //file is not for user's console type
     			}
     		}
-
 
     		if(f.link.contains("magnet"))
     		{

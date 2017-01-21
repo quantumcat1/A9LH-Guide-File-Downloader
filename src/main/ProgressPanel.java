@@ -3,6 +3,7 @@ package main;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -27,6 +28,7 @@ public class ProgressPanel implements PropertyChangeListener
     private void initialise()
     {
         panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
         label = new JLabel();
         progress = new JProgressBar(0, 100);
         panel.add(label);
