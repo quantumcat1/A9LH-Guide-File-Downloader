@@ -46,7 +46,7 @@ public class DownloadTask extends SwingWorker<Void, Void>
             ProgressPanel pp = gui.addNew(util.getFileName());
             addPropertyChangeListener(pp);
 
-            String saveFilePath = saveDirectory + File.separator + util.getFileName();
+            String saveFilePath = saveDirectory.equals("/") ||  saveDirectory.equals("") ? util.getFileName() : saveDirectory + File.separator + util.getFileName();
             File f = new File(saveDirectory);
             if(!f.exists())
             {

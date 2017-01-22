@@ -262,7 +262,6 @@ public class MainWindow extends JPanel implements ActionListener
             //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setPreferredSize(new Dimension(500, 600));
 
-
             status = new StatusWindow();
             status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
             status.setOpaque(true);
@@ -275,7 +274,20 @@ public class MainWindow extends JPanel implements ActionListener
 
     	for(FileVO f : page.getFiles())
     	{
-    		if(f.file.equals("unknown")) continue; //need to fill in direct file link in database
+    		if(f.file.equals("unknown"))
+    		{
+    			status.addMessage("The link \"" + f.name + "\"doesn't have a direct "
+    					+ "file link in the database yet. Please visit the link "
+    					+ "in the guide and download the file.");
+    			continue; //need to fill in direct file link in database
+    		}
+    		else if(f.file.equals("page"))
+    		{
+    			status.addMessage("The link \"" + f.name + "\" can't have its file "
+    					+ "downloaded automatically. Please visit the link in "
+    					+ "the guide.");
+    			continue;
+    		}
 
     		boolean foundone = false;
 
