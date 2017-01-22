@@ -97,9 +97,14 @@ public class DownloadTask extends SwingWorker<Void, Void>
         	if(ext.equals("7z") || ext.equals("zip"))
         	{
         		try {
-        			ZipFile zipFile = new ZipFile(saveDirectory + File.separator + fileName);
-       	         	zipFile.extractAll(saveDirectory);
+        			String saveFilePath = saveDirectory.equals("/") ||  saveDirectory.equals("") ? fileName : saveDirectory + File.separator + fileName;
+        			ZipFile zipFile = new ZipFile(saveFilePath);
+        			File f = new File(saveDirectory);
+        			String directory = f.getAbsolutePath();
+       	         	zipFile.extractAll(directory);
         	    } catch (ZipException e) {
+        	    	JOptionPane.showMessageDialog(gui, "Error extracting file: " + e.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
         	        e.printStackTrace();
         	    }
         	}
