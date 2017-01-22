@@ -126,6 +126,7 @@ public class MainWindow extends JPanel implements ActionListener
     private Page page;
     private ArrayList<Page> pages;
     private JButton btnGo;
+    private JButton btnReport;
     private StatusWindow status;
     private ConsoleVO console;
 
@@ -240,7 +241,7 @@ public class MainWindow extends JPanel implements ActionListener
         add(scrollPane);
 
         btnGo = new JButton("Download");
-        btnGo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //btnGo.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnGo.addActionListener(new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent event)
@@ -254,8 +255,25 @@ public class MainWindow extends JPanel implements ActionListener
 				}
         	}
         });
-        add(btnGo);
+        //add(btnGo);
+        btnReport = new JButton("Report a problem");
+        btnReport.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent event)
+        	{
+        		report(event);
+        	}
+        });
+        JPanel p = new JPanel();
+        p.add(btnReport);
+        p.add(btnGo);
+        add(p);
     }
+    private void report(ActionEvent event)
+    {
+    	System.out.println("report button pressed");
+    }
+
     private void download(ActionEvent event) throws FileNotFoundException
     {
     	if(page == null) return;
