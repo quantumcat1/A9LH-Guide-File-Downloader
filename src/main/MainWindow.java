@@ -128,6 +128,7 @@ public class MainWindow extends JPanel implements ActionListener
     private JButton btnGo;
     private JButton btnReport;
     private StatusWindow status;
+    private ReportWindow report;
     private ConsoleVO console;
 
 
@@ -271,6 +272,18 @@ public class MainWindow extends JPanel implements ActionListener
     }
     private void report(ActionEvent event)
     {
+    	JFrame fr = new JFrame("Report a problem");
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        fr.setPreferredSize(new Dimension(500, 600));
+
+        report = new ReportWindow();
+        report.setLayout(new BoxLayout(report, BoxLayout.PAGE_AXIS));
+        report.setOpaque(true);
+        fr.setContentPane(report);
+
+        fr.pack();
+        fr.setLocationRelativeTo(null);
+        fr.setVisible(true);
     	System.out.println("report button pressed");
     }
 
@@ -280,9 +293,6 @@ public class MainWindow extends JPanel implements ActionListener
 
     	try
     	{
-	    	DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
-	        Calendar calobj = Calendar.getInstance();
-
 	    	if(status == null)
 	    	{
 	    		JFrame frame = new JFrame(page.getTitle());
