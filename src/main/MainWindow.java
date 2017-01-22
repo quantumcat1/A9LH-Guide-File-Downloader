@@ -8,11 +8,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Enumeration;
 
 import javax.swing.BoxLayout;
@@ -238,12 +246,9 @@ public class MainWindow extends JPanel implements ActionListener
         	public void actionPerformed(ActionEvent event)
         	{
         		status = null;
-        		try {
+				try {
 					download(event);
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (CouldNotOpenUriSchemeHandler e) {
+				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -251,99 +256,118 @@ public class MainWindow extends JPanel implements ActionListener
         });
         add(btnGo);
     }
-    private void download(ActionEvent event) throws URISyntaxException, CouldNotOpenUriSchemeHandler
+    private void download(ActionEvent event) throws FileNotFoundException
     {
     	if(page == null) return;
-    	//String saveDir = "C:/Java Projects";
 
-    	if(status == null)
+    	try
     	{
-    		JFrame frame = new JFrame(page.getTitle());
-            //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setPreferredSize(new Dimension(500, 600));
+	    	DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+	        Calendar calobj = Calendar.getInstance();
 
-            status = new StatusWindow();
-            status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
-            status.setOpaque(true);
-            frame.setContentPane(status);
+	    	if(status == null)
+	    	{
+	    		JFrame frame = new JFrame(page.getTitle());
+	            //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	            frame.setPreferredSize(new Dimension(500, 600));
 
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
+	            status = new StatusWindow();
+	            status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
+	            status.setOpaque(true);
+	            frame.setContentPane(status);
+
+	            frame.pack();
+	            frame.setLocationRelativeTo(null);
+	            frame.setVisible(true);
+	    	}
+
+	    	for(FileVO f : page.getFiles())
+	    	{
+	    		if(f.file.equals("unknown"))
+	    		{
+	    			status.addMessage("The link \"" + f.name + "\"doesn't have a direct "
+	    					+ "file link in the database yet. Please visit the link "
+	    					+ "in the guide and download the file.");
+	    			SingletonFile.getInstance().write("No direct link for " + f.link);
+	    			continue; //need to fill in direct file link in database
+	    		}
+	    		else if(f.file.equals("page"))
+	    		{
+	    			status.addMessage("The link \"" + f.name + "\" can't have its file "
+	    					+ "downloaded automatically. Please visit the link in "
+	    					+ "the guide.");
+	    			SingletonFile.getInstance().write(f.link + " is a page and wasn't downloaded.");
+	    			continue;
+	    		}
+
+	    		boolean foundone = false;
+
+	    //..*****first check firmware of file to see if it matches the user's
+	    		String fw = f.firmware;
+	    		if(!fw.trim().equals("") || console.firmware == Firmware.ALL) //if blank, it's for all fws, so just keep going
+	    		{
+	    			String[] fws = fw.split("\\|");
+	    			foundone = false; //assume we don't find any until we actually find one
+	    			for(String afw : fws) //could be multiple firmwares separated by pipe character
+	    			{
+	    				if(afw.equals(console.firmware.desc))
+	    				{
+	    					foundone = true;
+	    				}
+	    			}
+	    			if(!foundone)
+	    			{
+	    				SingletonFile.getInstance().write(f.file + " is not for user's firmware (" + console.firmware.desc + ").");
+	    				continue; //file is not for user's firmware so don't download this file
+	    			}
+	    		}
+
+	    //..*****now check region to see if it matches user's
+	    		String reg = f.region;
+	    		if(!reg.trim().equals("") || console.region == Region.ALL) //if blank, it's for all regions, so just keep going
+	    		{
+	    			if(!console.region.name().equals(reg))
+	    			{
+	    				SingletonFile.getInstance().write(f.file + " is not for user's region (" + console.region.desc + ").");
+	    				continue; //file is not for user's region
+	    			}
+	    		}
+	     //..*****now check type to see if it matches user's
+	    		String t = f.type;
+	    		if(!t.trim().equals("") || console.type == Type.ALL) //if blank, for everyone, so just continue
+	    		{
+	    			if(!console.type.name().equals(t))
+	    			{
+	    				SingletonFile.getInstance().write(f.file + " is not for user's console type (" + console.type.desc + ").");
+	    				continue; //file is not for user's console type
+	    			}
+	    		}
+
+	    		if(f.link.contains("magnet"))
+	    		{
+	    			URI magnetLinkUri = new URI(f.link);
+	    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
+	    			uriSchemeHandler.open(magnetLinkUri);
+	    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
+	    		}
+	    		else
+	    		{
+		        	try
+		        	{
+		        		DownloadTask task = new DownloadTask(status, f);
+		        		task.execute();
+		        	}
+		        	catch(Exception ex)
+		        	{
+		        		SingletonFile.getInstance().write(f.file + " Error occurred during downloading.");
+		        		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		        	}
+	    		}
+	    	}
     	}
-
-    	for(FileVO f : page.getFiles())
+    	catch (Exception e)
     	{
-    		if(f.file.equals("unknown"))
-    		{
-    			status.addMessage("The link \"" + f.name + "\"doesn't have a direct "
-    					+ "file link in the database yet. Please visit the link "
-    					+ "in the guide and download the file.");
-    			continue; //need to fill in direct file link in database
-    		}
-    		else if(f.file.equals("page"))
-    		{
-    			status.addMessage("The link \"" + f.name + "\" can't have its file "
-    					+ "downloaded automatically. Please visit the link in "
-    					+ "the guide.");
-    			continue;
-    		}
-
-    		boolean foundone = false;
-
-    //..*****first check firmware of file to see if it matches the user's
-    		String fw = f.firmware;
-    		if(!fw.trim().equals("") || console.firmware == Firmware.ALL) //if blank, it's for all fws, so just keep going
-    		{
-    			String[] fws = fw.split("\\|");
-    			foundone = false; //assume we don't find any until we actually find one
-    			for(String afw : fws) //could be multiple firmwares separated by pipe character
-    			{
-    				if(afw.equals(console.firmware.desc))
-    				{
-    					foundone = true;
-    				}
-    			}
-    			if(!foundone) continue; //file is not for user's firmware so don't download this file
-    		}
-
-    //..*****now check region to see if it matches user's
-    		String reg = f.region;
-    		if(!reg.trim().equals("") || console.region == Region.ALL) //if blank, it's for all regions, so just keep going
-    		{
-    			if(!console.region.name().equals(reg))
-    			{
-    				continue; //file is not for user's region
-    			}
-    		}
-     //..*****now check type to see if it matches user's
-    		String t = f.type;
-    		if(!t.trim().equals("") || console.type == Type.ALL) //if blank, for everyone, so just continue
-    		{
-    			if(!console.type.name().equals(t))
-    			{
-    				continue; //file is not for user's console type
-    			}
-    		}
-
-    		if(f.link.contains("magnet"))
-    		{
-    			URI magnetLinkUri = new URI(f.link);
-    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
-    			uriSchemeHandler.open(magnetLinkUri);
-    		}
-    		else
-    		{
-	        	try
-	        	{
-	        		DownloadTask task = new DownloadTask(status, f);
-	        		task.execute();
-	        	}
-	        	catch(Exception ex)
-	        	{
-	        		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-	        	}
-    		}
+    		e.printStackTrace();
     	}
     }
 
@@ -416,6 +440,5 @@ public class MainWindow extends JPanel implements ActionListener
     	{
     		console.firmware = (Firmware)cb.getSelectedItem();
     	}
-
     }
 }

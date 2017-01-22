@@ -1,10 +1,16 @@
 package main;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -40,8 +46,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
             DownloadUtil util = new DownloadUtil();
             util.downloadFile(downloadURL);
 
-            // set file information on the GUI
-            //gui.setFileInfo(util.getFileName(), util.getContentLength());
+            SingletonFile.getInstance().write("Downloading from " + downloadURL);
+
             fileName = util.getFileName();
             ProgressPanel pp = gui.addNew(util.getFileName());
             addPropertyChangeListener(pp);
@@ -52,6 +58,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
             {
             	f.mkdirs();
             }
+
+            SingletonFile.getInstance().write("Saving to " + saveFilePath);
 
             InputStream inputStream = util.getInputStream();
             // opens an output stream to save into file
@@ -74,6 +82,7 @@ public class DownloadTask extends SwingWorker<Void, Void>
             outputStream.close();
 
             util.disconnect();
+            SingletonFile.getInstance().write(fileName + " successfully downloaded.");
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(gui, "Error downloading file: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -103,13 +112,14 @@ public class DownloadTask extends SwingWorker<Void, Void>
         			String directory = f.getAbsolutePath();
        	         	zipFile.extractAll(directory);
         	    } catch (ZipException e) {
-        	    	JOptionPane.showMessageDialog(gui, "Error extracting file: " + e.getMessage(),
+        	    	JOptionPane.showMessageDialog(gui, "Error extracting file: " + fileName + " " + e.getMessage(),
                             "Error", JOptionPane.ERROR_MESSAGE);
+        	    	SingletonFile.getInstance().write("Error extracting file: " + fileName + " " + e.getMessage());
         	        e.printStackTrace();
         	    }
         	}
             JOptionPane.showMessageDialog(gui,
-                    "File has been downloaded successfully!", "Message",
+                    "File " + fileName + " has been downloaded successfully!", "Message",
                     JOptionPane.INFORMATION_MESSAGE);
         }
     }
