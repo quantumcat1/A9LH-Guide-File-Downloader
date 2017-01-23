@@ -274,7 +274,7 @@ public class MainWindow extends JPanel implements ActionListener
     {
     	JFrame fr = new JFrame("Report a problem");
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        fr.setPreferredSize(new Dimension(500, 600));
+        fr.setPreferredSize(new Dimension(800, 600));
 
         report = new ReportWindow();
         report.setLayout(new BoxLayout(report, BoxLayout.PAGE_AXIS));
@@ -284,7 +284,6 @@ public class MainWindow extends JPanel implements ActionListener
         fr.pack();
         fr.setLocationRelativeTo(null);
         fr.setVisible(true);
-    	System.out.println("report button pressed");
     }
 
     private void download(ActionEvent event) throws FileNotFoundException
