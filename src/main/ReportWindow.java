@@ -5,52 +5,40 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 
 public class ReportWindow extends JPanel
 {
 	private static final long serialVersionUID = 7108898474166468466L;
 	private JTextArea message;
-	//private JTextArea contact;
 	private JTextField contact;
+	private JLabel status;
 
 	private void initialise()
 	{
-		/*JPanel panel1 = new JPanel();
-		JLabel label1 = new JLabel("Your email or GBATemp ID if you'd like a response:");
-		panel1.add(label1);
-		contact = new JTextArea();
-		panel1.add(contact);//scroll pane is just in case they try to put in lots of characters, so it won't warp the window
-		add(panel1);*/
-		JLabel label1 = new JLabel("Your email or GBATemp ID if you'd like a response:");
+		JLabel label1 = new JLabel("Enter your GBATemp ID if you'd like a response:");
 		JPanel panel1 = new JPanel();
 		panel1.add(label1);
 		add(panel1);
-		//contact = new JTextArea(1, 1);
 		contact = new JTextField();
 		contact.setMaximumSize(new Dimension(600, 100));
 		add(contact);
@@ -69,30 +57,46 @@ public class ReportWindow extends JPanel
         	@Override
         	public void actionPerformed(ActionEvent event)
         	{
-        		try {
-					report(event);
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+    			new Thread()
+    			{
+    				public void run()
+    				{
+    					try
+    					{
+							report(event);
+						}
+    					catch (Exception e)
+    					{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+    				}
+    			}.start();
         	}
         });
 		add(btn);
+		status = new JLabel();
+		status.setAlignmentX(Component.CENTER_ALIGNMENT);
+		add(status);
 	}
 
 	private void report(ActionEvent event) throws ClientProtocolException, IOException
 	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				status.setText("Sending...");
+			}
+		});
 		HttpClient client = HttpClientBuilder.create().build();
 		File file = new File("log.txt");
 		HttpPost post = new HttpPost("http://quantumc.at/report.php");
 		FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
 
-		String c = contact.getText().length() > 50 ? contact.getText().substring(0, 50) : contact.getText();
+		String c = contact.getText().trim().length() > 50 ? contact.getText().substring(0, 50) : contact.getText();
 		StringBody contactBody = new StringBody(c, ContentType.MULTIPART_FORM_DATA);
-		String m = message.getText().length() > 1000 ? message.getText().substring(0, 1000) : message.getText();
+		String m = message.getText().trim().length() > 1000 ? message.getText().substring(0, 1000) : message.getText();
 		StringBody messageBody = new StringBody(m, ContentType.MULTIPART_FORM_DATA);
 
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -104,7 +108,19 @@ public class ReportWindow extends JPanel
 
 		post.setEntity(entity);
 		HttpResponse response = client.execute(post);
-		System.out.println(response.toString());
+		String code = "Mail was not sent";
+		if(response.getStatusLine().getStatusCode() == 200)
+		{
+			code = "Mail sent successfully";
+		}
+		final String thing = code;
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				status.setText(thing);
+			}
+		});
 	}
 
 	public ReportWindow()
