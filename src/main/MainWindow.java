@@ -458,14 +458,17 @@ public class MainWindow extends JPanel implements ActionListener
     	if(cb == regionCombo)
     	{
     		console.region = (Region)cb.getSelectedItem();
+    		SingletonFile.getInstance().write("Region " + console.region.desc + " selected.");
     	}
     	else if (cb == typeCombo)
     	{
     		console.type = (Type)cb.getSelectedItem();
+    		SingletonFile.getInstance().write("Type " + console.type.desc + " selected.");
     	}
     	else if (cb == firmwareCombo)
     	{
     		console.firmware = (Firmware)cb.getSelectedItem();
+    		SingletonFile.getInstance().write("Firmware " + console.firmware.desc + " selected.");
     	}
     }
 }
