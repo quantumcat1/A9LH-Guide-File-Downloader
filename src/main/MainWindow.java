@@ -290,8 +290,8 @@ public class MainWindow extends JPanel implements ActionListener
     {
     	if(page == null) return;
 
-    	try
-    	{
+    	/*try
+    	{*/
 	    	if(status == null)
 	    	{
 	    		JFrame frame = new JFrame(page.getTitle());
@@ -372,10 +372,19 @@ public class MainWindow extends JPanel implements ActionListener
 
 	    		if(f.link.contains("magnet"))
 	    		{
-	    			URI magnetLinkUri = new URI(f.link);
-	    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
-	    			uriSchemeHandler.open(magnetLinkUri);
-	    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
+	    			try
+	    			{
+		    			URI magnetLinkUri = new URI(f.link);
+		    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
+		    			uriSchemeHandler.open(magnetLinkUri);
+		    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
+	    			}
+	    			catch(Exception e)
+	    			{
+	    				status.addMessage(f.file + " is a magnet link but failed to open."
+	    						+ " Please check you have a torrent client installed.");
+	    				SingletonFile.getInstance().write(f.file + " is a magnet link but failed to open");
+	    			}
 	    		}
 	    		else
 	    		{
@@ -391,11 +400,11 @@ public class MainWindow extends JPanel implements ActionListener
 		        	}
 	    		}
 	    	}
-    	}
+    	/*}
     	catch (Exception e)
     	{
     		e.printStackTrace();
-    	}
+    	}*/
     }
 
 
