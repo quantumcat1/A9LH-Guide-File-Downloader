@@ -80,15 +80,23 @@ public class ReportWindow extends JPanel
 		add(status);
 	}
 
-	private void report(ActionEvent event) throws ClientProtocolException, IOException
+	private void report(ActionEvent event)
 	{
+		String code = "Please enter a message.";
+		if(!message.getText().trim().equals(""))
+		{
+			code = "Sending...";
+		}
+		final String thing1 = code;
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				status.setText("Sending...");
+				status.setText(thing1);
 			}
 		});
+		if(message.getText().trim().equals("")) return; //don't send a message if message field is blank
+
 		HttpClient client = HttpClientBuilder.create().build();
 		File file = new File("log.txt");
 		HttpPost post = new HttpPost("http://quantumc.at/report.php");
@@ -107,12 +115,24 @@ public class ReportWindow extends JPanel
 		HttpEntity entity = builder.build();
 
 		post.setEntity(entity);
-		HttpResponse response = client.execute(post);
-		String code = "Mail was not sent";
-		if(response.getStatusLine().getStatusCode() == 200)
+
+		HttpResponse response = null;
+		code = "Mail was not sent";
+
+		try
 		{
-			code = "Mail sent successfully";
+			response = client.execute(post);
+			if(response.getStatusLine().getStatusCode() == 200)
+			{
+				code = "Mail sent successfully";
+			}
 		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
 		final String thing = code;
 		SwingUtilities.invokeLater(new Runnable()
 		{
