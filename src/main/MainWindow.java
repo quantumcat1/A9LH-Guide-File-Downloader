@@ -162,11 +162,11 @@ public class MainWindow extends JPanel implements ActionListener
     	pages = Page.getPages();
     	//Page.getPages();
 
-        JLabel title = new JLabel("A9LH Guide File Downloader");
+        /*JLabel title = new JLabel("A9LH Guide File Downloader");
         title.setMaximumSize(new Dimension(windowWidth, windowHeight/10));
         title.setMinimumSize(new Dimension(windowWidth, windowHeight/10));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(title);
+        add(title);*/
 
         JTextArea desc = new JTextArea("This program will download "
         		+ "files associated with particular pages "
@@ -378,12 +378,17 @@ public class MainWindow extends JPanel implements ActionListener
 		    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
 		    			uriSchemeHandler.open(magnetLinkUri);
 		    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
+		    			String path = f.path;
+		    			path = path.replace("./", "SD:/");
+		    			status.addMessage(f.file + " was opened in the default torrent client. When finished "
+		    					+ "downloading, please move it to " + path);
 	    			}
 	    			catch(Exception e)
 	    			{
-	    				status.addMessage(f.file + " is a magnet link but failed to open."
-	    						+ " Please check you have a torrent client installed.");
-	    				SingletonFile.getInstance().write(f.file + " is a magnet link but failed to open");
+	    				status.addMessage(f.file + " failed to open in default torrent client. "
+	    						+ "You are either trying to run this in Mac OS or don't have a torrent "
+	    						+ "client installed.");
+	    				SingletonFile.getInstance().write("Failed to open " + f.file + " in default torrent client.");
 	    			}
 	    		}
 	    		else
@@ -432,6 +437,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     public MainWindow() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
+    	SingletonFile.getInstance().write("Launching version compiled 26th January ... Australia day maaaaaaaaate!");
         initialise();
     }
 

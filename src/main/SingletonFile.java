@@ -11,7 +11,6 @@ import java.util.Calendar;
 
 public class SingletonFile
 {
-	private Calendar calobj;
 	private DateFormat df;
 	private static SingletonFile inst = null;
 

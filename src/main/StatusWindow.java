@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class StatusWindow extends JPanel
@@ -13,11 +14,9 @@ public class StatusWindow extends JPanel
     List<ProgressPanel> progressPanels;
     private JPanel panelOfPanels;
     private JTextArea message;
-    //JLabel label;
+
     public void initialise()
     {
-        //label = new JLabel("0%");
-        //add(label);
         progressPanels = new ArrayList<ProgressPanel>();
         panelOfPanels = new JPanel();
         panelOfPanels.setLayout(new BoxLayout(panelOfPanels, BoxLayout.PAGE_AXIS));
@@ -25,7 +24,7 @@ public class StatusWindow extends JPanel
         message.setWrapStyleWord(true);
         message.setLineWrap(true);
         add(panelOfPanels);
-        add(message);
+        add(new JScrollPane(message));
     }
 
     public StatusWindow()
@@ -35,7 +34,7 @@ public class StatusWindow extends JPanel
 
     public void addMessage (String m)
     {
-    	message.append(m);
+    	message.append(m + "\n~~~~~~~~~\n");
     }
 
     public ProgressPanel addNew(String name)
@@ -67,6 +66,4 @@ public class StatusWindow extends JPanel
         ProgressPanel pp = getPanel(name);
         pp.addProgress(progress);
     }
-
-
 }
