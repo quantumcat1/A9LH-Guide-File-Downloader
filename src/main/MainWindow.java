@@ -6,37 +6,23 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Enumeration;
 
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -48,7 +34,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import uriSchemeHandler.CouldNotOpenUriSchemeHandler;
 import uriSchemeHandler.URISchemeHandler;
 
 public class MainWindow extends JPanel implements ActionListener
@@ -160,7 +145,7 @@ public class MainWindow extends JPanel implements ActionListener
     {
     	console = new ConsoleVO();
     	pages = Page.getPages();
-    	//Page.getPages();
+
 
         /*JLabel title = new JLabel("A9LH Guide File Downloader");
         title.setMaximumSize(new Dimension(windowWidth, windowHeight/10));
@@ -273,7 +258,6 @@ public class MainWindow extends JPanel implements ActionListener
     private void report(ActionEvent event)
     {
     	JFrame fr = new JFrame("Report a problem");
-        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         fr.setPreferredSize(new Dimension(800, 600));
 
         report = new ReportWindow();
@@ -290,126 +274,119 @@ public class MainWindow extends JPanel implements ActionListener
     {
     	if(page == null) return;
 
-    	/*try
-    	{*/
-	    	if(status == null)
-	    	{
-	    		JFrame frame = new JFrame(page.getTitle());
-	            //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	            frame.setPreferredSize(new Dimension(500, 600));
-
-	            status = new StatusWindow();
-	            status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
-	            status.setOpaque(true);
-	            frame.setContentPane(status);
-
-	            frame.pack();
-	            frame.setLocationRelativeTo(null);
-	            frame.setVisible(true);
-	    	}
-
-	    	for(FileVO f : page.getFiles())
-	    	{
-	    		if(f.file.equals("unknown"))
-	    		{
-	    			status.addMessage("The link \"" + f.name + "\"doesn't have a direct "
-	    					+ "file link in the database yet. Please visit the link "
-	    					+ "in the guide and download the file.");
-	    			SingletonFile.getInstance().write("No direct link for " + f.link);
-	    			continue; //need to fill in direct file link in database
-	    		}
-	    		else if(f.file.equals("page"))
-	    		{
-	    			status.addMessage("The link \"" + f.name + "\" can't have its file "
-	    					+ "downloaded automatically. Please visit the link in "
-	    					+ "the guide.");
-	    			SingletonFile.getInstance().write(f.link + " is a page and wasn't downloaded.");
-	    			continue;
-	    		}
-
-	    		boolean foundone = false;
-
-	    //..*****first check firmware of file to see if it matches the user's
-	    		String fw = f.firmware;
-	    		if(!fw.trim().equals("") || console.firmware == Firmware.ALL) //if blank, it's for all fws, so just keep going
-	    		{
-	    			String[] fws = fw.split("\\|");
-	    			foundone = false; //assume we don't find any until we actually find one
-	    			for(String afw : fws) //could be multiple firmwares separated by pipe character
-	    			{
-	    				if(afw.equals(console.firmware.desc))
-	    				{
-	    					foundone = true;
-	    				}
-	    			}
-	    			if(!foundone)
-	    			{
-	    				SingletonFile.getInstance().write(f.file + " is not for user's firmware (" + console.firmware.desc + ").");
-	    				continue; //file is not for user's firmware so don't download this file
-	    			}
-	    		}
-
-	    //..*****now check region to see if it matches user's
-	    		String reg = f.region;
-	    		if(!reg.trim().equals("") || console.region == Region.ALL) //if blank, it's for all regions, so just keep going
-	    		{
-	    			if(!console.region.name().equals(reg))
-	    			{
-	    				SingletonFile.getInstance().write(f.file + " is not for user's region (" + console.region.desc + ").");
-	    				continue; //file is not for user's region
-	    			}
-	    		}
-	     //..*****now check type to see if it matches user's
-	    		String t = f.type;
-	    		if(!t.trim().equals("") || console.type == Type.ALL) //if blank, for everyone, so just continue
-	    		{
-	    			if(!console.type.name().equals(t))
-	    			{
-	    				SingletonFile.getInstance().write(f.file + " is not for user's console type (" + console.type.desc + ").");
-	    				continue; //file is not for user's console type
-	    			}
-	    		}
-
-	    		if(f.link.contains("magnet"))
-	    		{
-	    			try
-	    			{
-		    			URI magnetLinkUri = new URI(f.link);
-		    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
-		    			uriSchemeHandler.open(magnetLinkUri);
-		    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
-		    			String path = f.path;
-		    			path = path.replace("./", "SD:/");
-		    			status.addMessage(f.file + " was opened in the default torrent client. When finished "
-		    					+ "downloading, please move it to " + path);
-	    			}
-	    			catch(Exception e)
-	    			{
-	    				status.addMessage(f.file + " failed to open in default torrent client. "
-	    						+ "You are either trying to run this in Mac OS or don't have a torrent "
-	    						+ "client installed.");
-	    				SingletonFile.getInstance().write("Failed to open " + f.file + " in default torrent client.");
-	    			}
-	    		}
-	    		else
-	    		{
-		        	try
-		        	{
-		        		DownloadTask task = new DownloadTask(status, f);
-		        		task.execute();
-		        	}
-		        	catch(Exception ex)
-		        	{
-		        		SingletonFile.getInstance().write(f.file + " Error occurred during downloading.");
-		        		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		        	}
-	    		}
-	    	}
-    	/*}
-    	catch (Exception e)
+    	if(status == null)
     	{
-    		e.printStackTrace();
-    	}*/
+    		JFrame frame = new JFrame(page.getTitle());
+            //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setPreferredSize(new Dimension(500, 600));
+
+            status = new StatusWindow();
+            status.setLayout(new BoxLayout(status, BoxLayout.PAGE_AXIS));
+            status.setOpaque(true);
+            frame.setContentPane(status);
+
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+    	}
+
+    	for(FileVO f : page.getFiles())
+    	{
+    		if(f.file.equals("unknown"))
+    		{
+    			status.addMessage("The link \"" + f.name + "\"doesn't have a direct "
+    					+ "file link in the database yet. Please visit the link "
+    					+ "in the guide and download the file.");
+    			SingletonFile.getInstance().write("No direct link for " + f.link);
+    			continue; //need to fill in direct file link in database
+    		}
+    		else if(f.file.equals("page"))
+    		{
+    			status.addMessage("The link \"" + f.name + "\" can't have its file "
+    					+ "downloaded automatically. Please visit the link in "
+    					+ "the guide.");
+    			SingletonFile.getInstance().write(f.link + " is a page and wasn't downloaded.");
+    			continue;
+    		}
+
+    		boolean foundone = false;
+
+    //..*****first check firmware of file to see if it matches the user's
+    		String fw = f.firmware;
+    		if(!fw.trim().equals("") || console.firmware == Firmware.ALL) //if blank, it's for all fws, so just keep going
+    		{
+    			String[] fws = fw.split("\\|");
+    			foundone = false; //assume we don't find any until we actually find one
+    			for(String afw : fws) //could be multiple firmwares separated by pipe character
+    			{
+    				if(afw.equals(console.firmware.desc))
+    				{
+    					foundone = true;
+    				}
+    			}
+    			if(!foundone)
+    			{
+    				SingletonFile.getInstance().write(f.file + " is not for user's firmware (" + console.firmware.desc + ").");
+    				continue; //file is not for user's firmware so don't download this file
+    			}
+    		}
+
+    //..*****now check region to see if it matches user's
+    		String reg = f.region;
+    		if(!reg.trim().equals("") || console.region == Region.ALL) //if blank, it's for all regions, so just keep going
+    		{
+    			if(!console.region.name().equals(reg))
+    			{
+    				SingletonFile.getInstance().write(f.file + " is not for user's region (" + console.region.desc + ").");
+    				continue; //file is not for user's region
+    			}
+    		}
+     //..*****now check type to see if it matches user's
+    		String t = f.type;
+    		if(!t.trim().equals("") || console.type == Type.ALL) //if blank, for everyone, so just continue
+    		{
+    			if(!console.type.name().equals(t))
+    			{
+    				SingletonFile.getInstance().write(f.file + " is not for user's console type (" + console.type.desc + ").");
+    				continue; //file is not for user's console type
+    			}
+    		}
+
+    		if(f.link.contains("magnet"))
+    		{
+    			try
+    			{
+	    			URI magnetLinkUri = new URI(f.link);
+	    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
+	    			uriSchemeHandler.open(magnetLinkUri);
+	    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
+	    			String path = f.path;
+	    			path = path.replace("./", "SD:/");
+	    			status.addMessage(f.file + " was opened in the default torrent client. When finished "
+	    					+ "downloading, please move it to " + path);
+    			}
+    			catch(Exception e)
+    			{
+    				status.addMessage(f.file + " failed to open in default torrent client. "
+    						+ "You are either trying to run this in Mac OS or don't have a torrent "
+    						+ "client installed.");
+    				SingletonFile.getInstance().write("Failed to open " + f.file + " in default torrent client.");
+    			}
+    		}
+    		else
+    		{
+	        	try
+	        	{
+	        		DownloadTask task = new DownloadTask(status, f);
+	        		task.execute();
+	        	}
+	        	catch(Exception ex)
+	        	{
+	        		SingletonFile.getInstance().write(f.file + " Error occurred during downloading.");
+	        		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	        	}
+    		}
+    	}
     }
 
 
@@ -459,7 +436,7 @@ public class MainWindow extends JPanel implements ActionListener
         frame.setVisible(true);
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, ParserConfigurationException, SAXException, IOException, ParseException
+    public static void main(String[] args) throws Exception//ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, ParserConfigurationException, SAXException, IOException, ParseException
     {
         createWindow();
     }

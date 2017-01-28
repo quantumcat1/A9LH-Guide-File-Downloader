@@ -46,7 +46,6 @@ public class Page {
 	}
 
 	public static ArrayList<Page> getPages() throws ParseException
-	// public static void getPages()
 	{
 		ArrayList<Page> list = new ArrayList<Page>();
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -97,11 +96,11 @@ public class Page {
 			Iterator<Page> p_iter = list.iterator();
 
 			long max_duration = MILLISECONDS.convert(30, MINUTES);
-			// for(Page p : list)
+
 			while (p_iter.hasNext())
 			{
 				Page p = p_iter.next();
-				// for(FileVO f : p.files)
+
 				Iterator<FileVO> f_iter = p.files.iterator();
 
 				while (f_iter.hasNext())
@@ -117,7 +116,6 @@ public class Page {
 				}
 				if (p.files.isEmpty())
 				{
-					// list.remove(p);
 					p_iter.remove();
 				}
 			}

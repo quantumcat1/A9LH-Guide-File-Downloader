@@ -1,19 +1,16 @@
 package main;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.io.FilenameUtils;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -103,21 +100,71 @@ public class DownloadTask extends SwingWorker<Void, Void>
         {
         	String[] bits = fileName.split("\\.");
         	String ext = bits[bits.length-1];
-        	if(ext.equals("7z") || ext.equals("zip"))
-        	{
-        		try {
-        			String saveFilePath = saveDirectory.equals("/") ||  saveDirectory.equals("") ? fileName : saveDirectory + File.separator + fileName;
-        			ZipFile zipFile = new ZipFile(saveFilePath);
-        			File f = new File(saveDirectory);
-        			String directory = f.getAbsolutePath();
-       	         	zipFile.extractAll(directory);
-        	    } catch (ZipException e) {
-        	    	JOptionPane.showMessageDialog(gui, "Error extracting file: " + fileName + " " + e.getMessage(),
-                            "Error", JOptionPane.ERROR_MESSAGE);
-        	    	SingletonFile.getInstance().write("Error extracting file: " + fileName + " " + e.getMessage());
-        	        e.printStackTrace();
-        	    }
+        	String saveFilePath = saveDirectory;
+        	if (saveFilePath.endsWith("/")) {
+        		saveFilePath = saveFilePath.substring(0, saveFilePath.length() - 1);
         	}
+        	saveFilePath = saveFilePath.equals("") ? fileName : saveFilePath + "/" + fileName;
+
+        	File f = new File(saveDirectory);
+			//String directory = f.getAbsolutePath();
+			if(!f.exists()) f.mkdirs();
+        	try
+        	{
+	        	if(ext.equals("zip"))
+	        	{
+        			ZipFile zipFile = new ZipFile(saveFilePath);
+       	         	zipFile.extractAll(saveDirectory);
+	        	}
+	        	else if(ext.equals("7z"))
+	        	{
+	        		SevenZFile sevenZFile = new SevenZFile(new File(saveFilePath));
+	        		SevenZArchiveEntry entry = sevenZFile.getNextEntry();
+	        		while(entry != null)
+	        		{
+	        			System.out.println(entry.getName());
+	        			if(new File(entry.getName()).isDirectory())
+	        			{
+	        				entry = sevenZFile.getNextEntry();
+	        				continue;
+	        			}
+
+	        			String path = "";
+	        			if(entry.getName().contains("/"))
+	        			{
+	        				path = FilenameUtils.getPath(entry.getName());
+	        				if(!saveDirectory.endsWith("/"))
+	        				{
+	        					path = "/" + path;
+	        				}
+	        				path = saveDirectory + path;
+	        				File g = new File(path);
+	        				if(!g.exists()) g.mkdirs();
+	        				path = path + FilenameUtils.getName(entry.getName());
+	        			}
+	        			else
+	        			{
+	        				path = entry.getName();
+	        			}
+
+
+        		        FileOutputStream out = new FileOutputStream(path);
+        		        byte[] content = new byte[(int) entry.getSize()];
+        		        sevenZFile.read(content, 0, content.length);
+        		        out.write(content);
+        		        out.close();
+        		        entry = sevenZFile.getNextEntry();
+	        		 }
+	        		 sevenZFile.close();
+	        	}
+        	}
+        	catch (Exception e)
+        	{
+    	    	JOptionPane.showMessageDialog(gui, "Error extracting file: " + fileName + " " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+    	    	SingletonFile.getInstance().write("Error extracting file: " + fileName + " " + e.getMessage());
+    	        e.printStackTrace();
+    	    }
             JOptionPane.showMessageDialog(gui,
                     "File " + fileName + " has been downloaded successfully!", "Message",
                     JOptionPane.INFORMATION_MESSAGE);
