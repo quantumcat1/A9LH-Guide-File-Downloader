@@ -1,19 +1,22 @@
 package main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 
 public class DownloadTask extends SwingWorker<Void, Void>
 {
@@ -113,8 +116,49 @@ public class DownloadTask extends SwingWorker<Void, Void>
         	{
 	        	if(ext.equals("zip"))
 	        	{
-        			ZipFile zipFile = new ZipFile(saveFilePath);
-       	         	zipFile.extractAll(saveDirectory);
+        			/*ZipFile zipFile = new ZipFile(saveFilePath);
+       	         	//zipFile.extractAll(saveDirectory);
+        			zipFile.extractAll(FilenameUtils.getPath(saveFilePath));*/
+
+	        		ZipFile zipFile = new ZipFile(new File(saveFilePath));
+	        		final Enumeration<? extends ZipArchiveEntry> entries = zipFile.getEntries();
+	        	    while (entries.hasMoreElements())
+	        		{
+	        	    	ZipArchiveEntry entry = entries.nextElement();
+	        	    	String name = entry.getName();
+	        	    	if(name.endsWith("/") && !name.startsWith("/")) name = "/" + name;
+	        			System.out.println(name);
+	        			if(IsPathDirectory(name))
+	        			{
+	        				entry = entries.nextElement();
+	        				continue;
+	        			}
+
+	        			String path = "";
+	        			if(entry.getName().contains("/"))
+	        			{
+	        				path = FilenameUtils.getPath(entry.getName());
+	        				if(!saveDirectory.endsWith("/"))
+	        				{
+	        					path = "/" + path;
+	        				}
+	        				path = saveDirectory + path;
+	        				File g = new File(path);
+	        				if(!g.exists()) g.mkdirs();
+	        				path = path + FilenameUtils.getName(entry.getName());
+	        			}
+	        			else
+	        			{
+	        				path = entry.getName();
+	        			}
+
+        		        FileOutputStream out = new FileOutputStream(path);
+        		        InputStream in = zipFile.getInputStream(entry);
+        		        IOUtils.copy(in,out);
+        		        out.close();
+        		        in.close();
+	        		 }
+	        		 zipFile.close();
 	        	}
 	        	else if(ext.equals("7z"))
 	        	{
@@ -168,6 +212,18 @@ public class DownloadTask extends SwingWorker<Void, Void>
             JOptionPane.showMessageDialog(gui,
                     "File " + fileName + " has been downloaded successfully!", "Message",
                     JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    private boolean IsPathDirectory(String path) {
+        File test = new File(path);
+
+        // check if the file/directory is already there
+        if (!test.exists()) {
+            // see if the file portion it doesn't have an extension
+            return test.getName().lastIndexOf('.') == -1;
+        } else {
+            // see if the path that's already in place is a file or directory
+            return test.isDirectory();
         }
     }
 }
