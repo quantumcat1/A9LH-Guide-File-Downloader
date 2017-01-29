@@ -313,7 +313,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     //..*****first check firmware of file to see if it matches the user's
     		String fw = f.firmware;
-    		if(!fw.trim().equals("") || console.firmware == Firmware.ALL) //if blank, it's for all fws, so just keep going
+    		if(!fw.trim().equals("") && console.firmware != Firmware.ALL) //if blank, it's for all fws, so just keep going
     		{
     			String[] fws = fw.split("\\|");
     			foundone = false; //assume we don't find any until we actually find one
@@ -333,7 +333,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     //..*****now check region to see if it matches user's
     		String reg = f.region;
-    		if(!reg.trim().equals("") || console.region == Region.ALL) //if blank, it's for all regions, so just keep going
+    		if(!reg.trim().equals("") && console.region != Region.ALL) //if blank, it's for all regions, so just keep going
     		{
     			if(!console.region.name().equals(reg))
     			{
@@ -342,8 +342,8 @@ public class MainWindow extends JPanel implements ActionListener
     			}
     		}
      //..*****now check type to see if it matches user's
-    		String t = f.type;
-    		if(!t.trim().equals("") || console.type == Type.ALL) //if blank, for everyone, so just continue
+    		String t = f.type.trim();
+    		if(!t.equals("") && console.type != Type.ALL) //if blank, for everyone, so just continue
     		{
     			if(!console.type.name().equals(t))
     			{
@@ -414,7 +414,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     public MainWindow() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
-    	SingletonFile.getInstance().write("Launching version compiled 26th January ... Australia day maaaaaaaaate!");
+    	SingletonFile.getInstance().write("Launching version compiled 28th January");
         initialise();
     }
 
