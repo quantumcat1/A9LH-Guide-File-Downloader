@@ -12,6 +12,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -32,6 +33,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.frostwire.jlibtorrent.*;
+import com.frostwire.jlibtorrent.alerts.Alert;
+import com.frostwire.jlibtorrent.alerts.AlertType;
+import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert;
+import com.frostwire.jlibtorrent.alerts.TorrentAddedAlert;
 
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
@@ -358,7 +363,7 @@ public class MainWindow extends JPanel implements ActionListener
     		{
 				// testing making torrent files:
 				String uri = f.link;
-				File saveDir = new File("/torrents/" + f.name + ".torrent");
+				File saveDir = new File("/torrents/" + f.file + ".torrent");
 				final SessionManager s = new SessionManager();
 				s.start();
 				System.out.println("Fetching the magnet uri, please wait...");
@@ -368,12 +373,58 @@ public class MainWindow extends JPanel implements ActionListener
 					System.out.println(Entry.bdecode(data));
 					FileUtils.writeByteArrayToFile(saveDir, data);
 					System.out.println("Torrent data saved to: " + saveDir);
-				} else
+				}
+				else
 				{
 					System.out.println("Failed to retrieve the magnet");
 				}
+
+				final CountDownLatch signal = new CountDownLatch(1);
+
+		        s.addListener(new AlertListener()
+		        {
+		            @Override
+		            public int[] types()
+		            {
+		                return null;
+		            }
+	                @Override
+	                public void alert(Alert<?> alert)
+	                {
+			            AlertType type = alert.type();
+
+			            switch (type)
+			            {
+			                case TORRENT_ADDED:
+			                    System.out.println("Torrent added");
+			                    ((TorrentAddedAlert) alert).handle().resume();
+			                    break;
+			                case BLOCK_FINISHED:
+			                    BlockFinishedAlert a = (BlockFinishedAlert) alert;
+			                    int p = (int) (a.handle().status().progress() * 100);
+			                    System.out.println("Progress: " + p + " for torrent name: " + a.torrentName());
+			                    System.out.println(s.stats().totalDownload());
+			                    break;
+			                case TORRENT_FINISHED:
+			                    System.out.println("Torrent finished");
+			                    signal.countDown();
+			                    break;
+			            }
+	                }
+		        });
+
+		        TorrentInfo ti = new TorrentInfo(saveDir);
+		        s.download(ti, saveDir.getParentFile());
+
+		        try {
+					signal.await();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				s.stop();
-    			try
+    			/*try
     			{
 	    			URI magnetLinkUri = new URI(f.link);
 	    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
@@ -390,7 +441,7 @@ public class MainWindow extends JPanel implements ActionListener
     						+ "You are either trying to run this in Mac OS or don't have a torrent "
     						+ "client installed.");
     				SingletonFile.getInstance().write("Failed to open " + f.file + " in default torrent client.");
-    			}
+    			}*/
 
     		}
     		/*else
