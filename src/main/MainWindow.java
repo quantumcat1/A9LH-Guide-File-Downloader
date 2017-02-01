@@ -19,10 +19,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -361,69 +363,16 @@ public class MainWindow extends JPanel implements ActionListener
 
     		if(f.link.contains("magnet"))
     		{
-				// testing making torrent files:
-				String uri = f.link;
-				File saveDir = new File("/torrents/" + f.file + ".torrent");
-				final SessionManager s = new SessionManager();
-				s.start();
-				System.out.println("Fetching the magnet uri, please wait...");
-				byte[] data = s.fetchMagnet(uri, 30);
-				if (data != null)
-				{
-					System.out.println(Entry.bdecode(data));
-					FileUtils.writeByteArrayToFile(saveDir, data);
-					System.out.println("Torrent data saved to: " + saveDir);
-				}
-				else
-				{
-					System.out.println("Failed to retrieve the magnet");
-				}
 
-				final CountDownLatch signal = new CountDownLatch(1);
-
-		        s.addListener(new AlertListener()
-		        {
-		            @Override
-		            public int[] types()
-		            {
-		                return null;
-		            }
-	                @Override
-	                public void alert(Alert<?> alert)
-	                {
-			            AlertType type = alert.type();
-
-			            switch (type)
-			            {
-			                case TORRENT_ADDED:
-			                    System.out.println("Torrent added");
-			                    ((TorrentAddedAlert) alert).handle().resume();
-			                    break;
-			                case BLOCK_FINISHED:
-			                    BlockFinishedAlert a = (BlockFinishedAlert) alert;
-			                    int p = (int) (a.handle().status().progress() * 100);
-			                    System.out.println("Progress: " + p + " for torrent name: " + a.torrentName());
-			                    System.out.println(s.stats().totalDownload());
-			                    break;
-			                case TORRENT_FINISHED:
-			                    System.out.println("Torrent finished");
-			                    signal.countDown();
-			                    break;
-			            }
-	                }
-		        });
-
-		        TorrentInfo ti = new TorrentInfo(saveDir);
-		        s.download(ti, saveDir.getParentFile());
-
-		        try {
-					signal.await();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				s.stop();
+    			try
+    			{
+	    			TorrentWorker tw = new TorrentWorker(f.link, f.file, status);
+	    			tw.execute();
+    			}
+    			catch(Exception e)
+    			{
+    				e.printStackTrace();
+    			}
     			/*try
     			{
 	    			URI magnetLinkUri = new URI(f.link);
@@ -444,9 +393,9 @@ public class MainWindow extends JPanel implements ActionListener
     			}*/
 
     		}
-    		/*else
+    		else
     		{
-	        	try
+	        	/*try
 	        	{
 	        		DownloadTask task = new DownloadTask(status, f);
 	        		task.execute();
@@ -455,8 +404,8 @@ public class MainWindow extends JPanel implements ActionListener
 	        	{
 	        		SingletonFile.getInstance().write(f.file + " Error occurred during downloading.");
 	        		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-	        	}
-    		}*/
+	        	}*/
+    		}
     	}
     }
 
