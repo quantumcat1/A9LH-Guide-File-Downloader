@@ -6,7 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.text.ParseException;
@@ -18,7 +18,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -32,6 +31,9 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.frostwire.jlibtorrent.*;
+
+import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 import uriSchemeHandler.URISchemeHandler;
@@ -235,7 +237,7 @@ public class MainWindow extends JPanel implements ActionListener
         		status = null;
 				try {
 					download(event);
-				} catch (FileNotFoundException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -270,7 +272,7 @@ public class MainWindow extends JPanel implements ActionListener
         fr.setVisible(true);
     }
 
-    private void download(ActionEvent event) throws FileNotFoundException
+    private void download(ActionEvent event) throws IOException
     {
     	if(page == null) return;
 
@@ -354,6 +356,23 @@ public class MainWindow extends JPanel implements ActionListener
 
     		if(f.link.contains("magnet"))
     		{
+				// testing making torrent files:
+				String uri = f.link;
+				File saveDir = new File("/torrents/" + f.name + ".torrent");
+				final SessionManager s = new SessionManager();
+				s.start();
+				System.out.println("Fetching the magnet uri, please wait...");
+				byte[] data = s.fetchMagnet(uri, 30);
+				if (data != null)
+				{
+					System.out.println(Entry.bdecode(data));
+					FileUtils.writeByteArrayToFile(saveDir, data);
+					System.out.println("Torrent data saved to: " + saveDir);
+				} else
+				{
+					System.out.println("Failed to retrieve the magnet");
+				}
+				s.stop();
     			try
     			{
 	    			URI magnetLinkUri = new URI(f.link);
@@ -372,8 +391,9 @@ public class MainWindow extends JPanel implements ActionListener
     						+ "client installed.");
     				SingletonFile.getInstance().write("Failed to open " + f.file + " in default torrent client.");
     			}
+
     		}
-    		else
+    		/*else
     		{
 	        	try
 	        	{
@@ -385,7 +405,7 @@ public class MainWindow extends JPanel implements ActionListener
 	        		SingletonFile.getInstance().write(f.file + " Error occurred during downloading.");
 	        		JOptionPane.showMessageDialog(this,  "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	        	}
-    		}
+    		}*/
     	}
     }
 
