@@ -166,7 +166,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
 	        		while(entry != null)
 	        		{
 	        			System.out.println(entry.getName());
-	        			if(new File(entry.getName()).isDirectory())
+	        			//if(new File(entry.getName()).isDirectory())
+	        			if(IsPathDirectory(entry.getName()))
 	        			{
 	        				entry = sevenZFile.getNextEntry();
 	        				continue;

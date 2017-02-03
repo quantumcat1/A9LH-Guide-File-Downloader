@@ -30,7 +30,8 @@ public class DownloadUtil {
      *            HTTP URL of the file to be downloaded
      * @throws IOException
      */
-    public void downloadFile(String fileURL) throws IOException {
+    public void downloadFile(String fileURL) throws IOException 
+    {
         URL url = new URL(fileURL);
         httpConn = (HttpURLConnection) url.openConnection();
         int responseCode = httpConn.getResponseCode();

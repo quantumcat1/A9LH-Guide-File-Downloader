@@ -94,14 +94,15 @@ public class DownloadHandler
 		{
 			if(f.link.contains("magnet"))
 			{
-				//TorrentWorker tw = new TorrentWorker(f, status);
-				//return tw;
-				return null;
+				TorrentWorker tw = new TorrentWorker(f, status);
+				return tw;
+				//return null;
 			}
 			else
 			{
-				DownloadTask task = new DownloadTask(f, status);
-        		return task;
+				//DownloadTask task = new DownloadTask(f, status);
+        		//return task;
+				return null;
 			}
 		}
 		catch(Exception e)

@@ -349,7 +349,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     public MainWindow() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
-    	SingletonFile.getInstance().write("Launching version compiled 28th January");
+    	SingletonFile.getInstance().write("Launching version compiled 3rd February");
         initialise();
     }
 
