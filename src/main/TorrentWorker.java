@@ -19,41 +19,46 @@ import com.frostwire.jlibtorrent.alerts.TorrentAddedAlert;
 
 public class TorrentWorker extends SwingWorker<Void, Void>
 {
-	private File f;
-	private String fileName;
-	private String magnetLink;
+	private File torrentFile;
+	private FileVO fileVO;
 	private ProgressPanel pp;
 	final private SessionManager s;
 
-	public TorrentWorker(String magnetLink, String fileName, StatusWindow status)
+	public TorrentWorker(FileVO fileVO, StatusWindow status)
 	{
-		this.fileName = fileName;
-		this.magnetLink = magnetLink;
-		this.pp = status.addNew(fileName);
+		this.fileVO = fileVO;
+		this.pp = status.addNew(fileVO.file);
 
-		// making torrent files:
-		f = new File("/torrents/" + fileName + ".torrent");
+		// making torrent file:
+		torrentFile = new File("/torrents/" + fileVO.file + ".torrent");
 		s = new SessionManager();
 		s.start();
 		System.out.println("Fetching the magnet uri, please wait...");
-		byte[] data = s.fetchMagnet(magnetLink, 30);
-		if (data != null)
+		if(torrentFile.exists())
 		{
-			System.out.println(Entry.bdecode(data));
-			try
-			{
-				FileUtils.writeByteArrayToFile(f, data);
-			}
-			catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("Torrent data saved to: " + f.getAbsolutePath());
+			System.out.println("Torrent already exists");
 		}
 		else
 		{
-			System.out.println("Failed to retrieve the magnet");
+			byte[] data = s.fetchMagnet(fileVO.link, 30);
+			if (data != null)
+			{
+				System.out.println(Entry.bdecode(data));
+				try
+				{
+					FileUtils.writeByteArrayToFile(torrentFile, data);
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Torrent data saved to: " + torrentFile.getAbsolutePath());
+			}
+			else
+			{
+				System.out.println("Failed to retrieve the magnet");
+			}
 		}
 	}
 
@@ -100,8 +105,8 @@ public class TorrentWorker extends SwingWorker<Void, Void>
 	            }
 	        });
 
-			TorrentInfo ti = new TorrentInfo(f);
-			s.download(ti, f.getParentFile());
+			TorrentInfo ti = new TorrentInfo(torrentFile);
+			s.download(ti, torrentFile.getParentFile());
 
 			signal.await();
 

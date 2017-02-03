@@ -25,7 +25,7 @@ public class DownloadTask extends SwingWorker<Void, Void>
     private StatusWindow gui;
     private String fileName;
 
-    public DownloadTask(StatusWindow gui, FileVO file)
+    public DownloadTask(FileVO file, StatusWindow gui)
     {
         this.gui = gui;
         this.downloadURL = file.file;
