@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Enumeration;
 import java.util.concurrent.CountDownLatch;
 
@@ -27,53 +28,66 @@ import com.frostwire.jlibtorrent.alerts.AlertType;
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert;
 import com.frostwire.jlibtorrent.alerts.TorrentAddedAlert;
 
+import uriSchemeHandler.URISchemeHandler;
+
 public class TorrentWorker extends SwingWorker<Void, Void>
 {
 	private File torrentFile;
 	private FileVO fileVO;
 	private ProgressPanel pp;
-	final private SessionManager s;
+	private SessionManager s = null;
+	//final private SessionManager s
+	private StatusWindow status;
 
 	public TorrentWorker(FileVO fileVO, StatusWindow status)
 	{
 		this.fileVO = fileVO;
 		this.pp = status.addNew(fileVO.file);
+		this.status = status;
 
 		// making torrent file:
 		torrentFile = new File("/torrents/" + fileVO.file + ".torrent");
-		s = new SessionManager();
-		s.start();
-		System.out.println("Fetching the magnet uri, please wait...");
-		if(torrentFile.exists())
+		try
 		{
-			System.out.println("Torrent already exists");
-		}
-		else
-		{
-			byte[] data = s.fetchMagnet(fileVO.link, 30);
-			if (data != null)
+			s = new SessionManager();
+			s.start();
+
+			System.out.println("Fetching the magnet uri, please wait...");
+			if(torrentFile.exists())
 			{
-				System.out.println(Entry.bdecode(data));
-				try
-				{
-					FileUtils.writeByteArrayToFile(torrentFile, data);
-				}
-				catch (IOException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("Torrent data saved to: " + torrentFile.getAbsolutePath());
+				System.out.println("Torrent already exists");
 			}
 			else
 			{
-				System.out.println("Failed to retrieve the magnet");
+				byte[] data = s.fetchMagnet(fileVO.link, 30);
+				if (data != null)
+				{
+					System.out.println(Entry.bdecode(data));
+					try
+					{
+						FileUtils.writeByteArrayToFile(torrentFile, data);
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("Torrent data saved to: " + torrentFile.getAbsolutePath());
+				}
+				else
+				{
+					System.out.println("Failed to retrieve the magnet");
+				}
 			}
+		}
+		catch(Throwable t)
+		{
+			TryURIScheme();
 		}
 	}
 
 	@Override
-	protected Void doInBackground() throws Exception
+	protected Void doInBackground() //throws Exception
 	{
 		try
 		{
@@ -128,9 +142,34 @@ public class TorrentWorker extends SwingWorker<Void, Void>
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			TryURIScheme();
 		}
 		return null;
+	}
+	public void TryURIScheme()
+	{
+		status.addMessage(fileVO.file + ": Direct torrent downloading failed. Please report this"
+				+ " and include what OS you have. Opening your torrent client...");
+		SingletonFile.getInstance().write("Failed to download " + fileVO.file + ", trying default torrent client...");
+
+		try
+		{
+			URI magnetLinkUri = new URI(fileVO.link);
+			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
+			uriSchemeHandler.open(magnetLinkUri);
+			SingletonFile.getInstance().write(fileVO.file + " is a magnet link and was opened accordingly.");
+			String path = fileVO.path;
+			path = path.replace("./", "SD:/");
+			status.addMessage(fileVO.file + " was opened in the default torrent client. When finished "
+					+ "downloading, please move it to " + path);
+		}
+		catch(Exception ex)
+		{
+			status.addMessage(fileVO.file + " failed to open in default torrent client. "
+					+ "You are either not running this in Windows or don't have a torrent "
+					+ "client installed.");
+			SingletonFile.getInstance().write("Failed to open " + fileVO.file + " in default torrent client.");
+		}
 	}
     @Override
     protected void done()

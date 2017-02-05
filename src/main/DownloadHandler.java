@@ -1,5 +1,6 @@
 package main;
 
+import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -8,6 +9,7 @@ import javax.swing.SwingWorker;
 import main.MainWindow.Firmware;
 import main.MainWindow.Region;
 import main.MainWindow.Type;
+import uriSchemeHandler.URISchemeHandler;
 
 public class DownloadHandler
 {
@@ -100,9 +102,9 @@ public class DownloadHandler
 			}
 			else
 			{
-				//DownloadTask task = new DownloadTask(f, status);
-        		//return task;
-				return null;
+				DownloadTask task = new DownloadTask(f, status);
+        		return task;
+				//return null;
 			}
 		}
 		catch(Exception e)
@@ -114,20 +116,21 @@ public class DownloadHandler
 
 	public void downloadAll(Page page, StatusWindow status, ConsoleVO c)
 	{
-		ExecutorService es = Executors.newFixedThreadPool(4);
 		for(FileVO f : page.getFiles())
     	{
 			Reason reason = willDownload(f, c);
 			if(reason == Reason.OK)
 			{
 				SwingWorker sw = download(f, c, status);
-				if(sw != null) es.execute(sw);
+				if(sw != null)
+				{
+					sw.execute();
+				}
 			}
 			else
 			{
-				status.addMessage(f.file + ": " + reason.toString());
+				status.addMessage(f.name + ": " + reason.toString());
 			}
     	}
-		es.shutdown();
 	}
 }

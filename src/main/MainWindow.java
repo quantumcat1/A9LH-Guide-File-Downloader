@@ -304,24 +304,7 @@ public class MainWindow extends JPanel implements ActionListener
     	DownloadHandler dh = new DownloadHandler();
     	dh.downloadAll(page, status, console);
 
-			/*try
-			{
-    			URI magnetLinkUri = new URI(f.link);
-    			URISchemeHandler uriSchemeHandler = new URISchemeHandler();
-    			uriSchemeHandler.open(magnetLinkUri);
-    			SingletonFile.getInstance().write(f.file + " is a magnet link and was opened accordingly.");
-    			String path = f.path;
-    			path = path.replace("./", "SD:/");
-    			status.addMessage(f.file + " was opened in the default torrent client. When finished "
-    					+ "downloading, please move it to " + path);
-			}
-			catch(Exception e)
-			{
-				status.addMessage(f.file + " failed to open in default torrent client. "
-						+ "You are either trying to run this in Mac OS or don't have a torrent "
-						+ "client installed.");
-				SingletonFile.getInstance().write("Failed to open " + f.file + " in default torrent client.");
-			}*/
+
     }
 
 
