@@ -28,8 +28,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
     public DownloadTask(FileVO file, StatusWindow gui)
     {
         this.gui = gui;
-        this.downloadURL = file.file;
-        this.saveDirectory = file.path.replace("./", "/");
+        downloadURL = file.file;
+        saveDirectory = file.path.replace("./", "/");
         fileName = "";
         if(!file.message.equals("")) gui.addMessage(file.name + ": " + file.message);
     }
@@ -51,7 +51,20 @@ public class DownloadTask extends SwingWorker<Void, Void>
             ProgressPanel pp = gui.addNew(util.getFileName());
             addPropertyChangeListener(pp);
 
-            String saveFilePath = saveDirectory.equals("/") ||  saveDirectory.equals("") ? util.getFileName() : saveDirectory + File.separator + util.getFileName();
+            if (saveDirectory.endsWith("/"))
+        	{
+            	saveDirectory = saveDirectory.substring(0, saveDirectory.length() - 1);
+        	}
+
+            if (saveDirectory.startsWith("/"))
+        	{
+            	String basePath = new File("").getAbsolutePath();
+            	saveDirectory = basePath + saveDirectory;
+        	}
+            String saveFilePath = saveDirectory.equals("/") ||  saveDirectory.equals("") ? util.getFileName() : saveDirectory + "/" + util.getFileName();
+
+
+
             File f = new File(saveDirectory);
             if(!f.exists())
             {
@@ -82,7 +95,9 @@ public class DownloadTask extends SwingWorker<Void, Void>
 
             util.disconnect();
             SingletonFile.getInstance().write(fileName + " successfully downloaded.");
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             JOptionPane.showMessageDialog(gui, "Error downloading file: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
@@ -103,7 +118,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
         	String[] bits = fileName.split("\\.");
         	String ext = bits[bits.length-1];
         	String saveFilePath = saveDirectory;
-        	if (saveFilePath.endsWith("/")) {
+        	if (saveFilePath.endsWith("/"))
+        	{
         		saveFilePath = saveFilePath.substring(0, saveFilePath.length() - 1);
         	}
         	saveFilePath = saveFilePath.equals("") ? fileName : saveFilePath + "/" + fileName;
@@ -188,7 +204,11 @@ public class DownloadTask extends SwingWorker<Void, Void>
 	        			}
 	        			else
 	        			{
-	        				path = entry.getName();
+	        				if(!saveDirectory.endsWith("/"))
+	        				{
+	        					saveDirectory = saveDirectory + "/";
+	        				}
+	        				path = saveDirectory + entry.getName();
 	        			}
 
 
@@ -214,7 +234,8 @@ public class DownloadTask extends SwingWorker<Void, Void>
                     JOptionPane.INFORMATION_MESSAGE);
         }
     }
-    private boolean IsPathDirectory(String path) {
+    private boolean IsPathDirectory(String path)
+    {
         File test = new File(path);
 
         // check if the file/directory is already there

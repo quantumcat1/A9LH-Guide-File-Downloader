@@ -232,6 +232,7 @@ public class MainWindow extends JPanel implements ActionListener
             public void valueChanged(ListSelectionEvent e)
             {
             	page = pages.get(pageTable.getSelectedRow());
+            	SingletonFile.getInstance().write("Page " + page.title + " selected.");
             }
         });
         JScrollPane scrollPane = new JScrollPane(pageTable);
@@ -244,9 +245,12 @@ public class MainWindow extends JPanel implements ActionListener
         	public void actionPerformed(ActionEvent event)
         	{
         		status = null;
-				try {
+				try
+				{
 					download(event);
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -303,11 +307,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     	DownloadHandler dh = new DownloadHandler();
     	dh.downloadAll(page, status, console);
-
-
     }
-
-
 
     private void setTableRows()
     {
@@ -332,7 +332,7 @@ public class MainWindow extends JPanel implements ActionListener
 
     public MainWindow() throws ParserConfigurationException, SAXException, IOException, ParseException
     {
-    	SingletonFile.getInstance().write("Launching version compiled 3rd February");
+    	SingletonFile.getInstance().write("Launching version compiled 22nd February");
         initialise();
     }
 

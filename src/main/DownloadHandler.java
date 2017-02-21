@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.SwingWorker;
+import javax.swing.plaf.FileChooserUI;
 
 import main.MainWindow.Firmware;
 import main.MainWindow.Region;

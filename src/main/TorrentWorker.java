@@ -82,6 +82,7 @@ public class TorrentWorker extends SwingWorker<Void, Void>
 		}
 		catch(Throwable t)
 		{
+			t.printStackTrace();
 			TryURIScheme();
 		}
 	}
@@ -142,6 +143,7 @@ public class TorrentWorker extends SwingWorker<Void, Void>
 		}
 		catch(Exception e)
 		{
+			e.printStackTrace();
 			TryURIScheme();
 		}
 		return null;
@@ -165,6 +167,7 @@ public class TorrentWorker extends SwingWorker<Void, Void>
 		}
 		catch(Exception ex)
 		{
+			ex.printStackTrace();
 			status.addMessage(fileVO.file + " failed to open in default torrent client. "
 					+ "You are either not running this in Windows or don't have a torrent "
 					+ "client installed.");

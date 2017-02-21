@@ -16,24 +16,28 @@ import org.json.JSONObject;
 
 import static java.util.concurrent.TimeUnit.*;
 
-public class Page {
+public class Page
+{
 	String title;
 	String url;
 	ArrayList<FileVO> files;
 
-	public Page() {
+	public Page()
+	{
 		title = "";
 		url = "";
 		files = new ArrayList<FileVO>();
 	}
 
-	public Page(String title, ArrayList<FileVO> files) {
+	public Page(String title, ArrayList<FileVO> files)
+	{
 		this.title = title;
 		url = "";
 		this.files = files;
 	}
 
-	public ArrayList<FileVO> getFiles() {
+	public ArrayList<FileVO> getFiles()
+	{
 		return files;
 	}
 
@@ -46,30 +50,40 @@ public class Page {
 		HttpResponse response = null;
 		String responseString = "";
 		boolean connected = true;
-		try {
+		try
+		{
 			response = httpClient.execute(post);
 			responseString = EntityUtils.toString(response.getEntity());
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			connected = false;
 			e.printStackTrace();
 		}
-		if (connected) {
+		if (connected)
+		{
 			JSONArray arr = new JSONArray(responseString);
-			try {
+			try
+			{
 				httpClient.close();
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date mostRecentTS = sdf.parse("2001-01-01 00:00:00");
-			for (int i = 0; i < arr.length(); i++) {
+			for (int i = 0; i < arr.length(); i++)
+			{
 				JSONObject obj = arr.getJSONObject(i);
 				JSONArray jsonfiles = obj.getJSONArray("files");
 				ArrayList<FileVO> files = new ArrayList<FileVO>();
 
-				for (int j = 0; j < jsonfiles.length(); j++) {
+				for (int j = 0; j < jsonfiles.length(); j++)
+				{
 					String ts = jsonfiles.getJSONObject(j).getString("ts");
-					if (sdf.parse(ts).after(mostRecentTS)) {
+					if (sdf.parse(ts).after(mostRecentTS))
+					{
 						mostRecentTS = sdf.parse(ts);
 					}
 
